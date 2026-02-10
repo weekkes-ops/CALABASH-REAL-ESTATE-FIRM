@@ -1,0 +1,7 @@
+{
+  "name": "Calabash Real Estate Company",
+  "description": "Building Value. Creating Communities. Securing Futures. A trusted real estate firm committed to delivering reliable property solutions with integrity and excellence.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
