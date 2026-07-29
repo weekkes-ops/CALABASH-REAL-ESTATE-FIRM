@@ -2,6 +2,7 @@
 import React, { useState, useRef } from 'react';
 import { Agent, Property } from '../types';
 import { generatePropertyDescription } from '../services/geminiService';
+import { AgentAnalytics } from './AgentAnalytics';
 
 interface AgentDashboardProps {
   agent: Agent;
@@ -142,7 +143,7 @@ const AgentDashboard: React.FC<AgentDashboardProps> = ({
   };
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-12">
+    <div className="max-w-6xl mx-auto px-4 py-12">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
         <div>
           <h1 className="text-3xl font-extrabold text-blue-950">Agent Dashboard</h1>
@@ -338,9 +339,21 @@ const AgentDashboard: React.FC<AgentDashboardProps> = ({
           </form>
         </div>
       ) : (
-        <div className="space-y-6">
-          <h2 className="text-xl font-bold text-blue-950">Your Active Listings</h2>
-          {agentProperties.length > 0 ? (
+        <div className="space-y-10">
+          {/* Data Visualization & Performance Section */}
+          <AgentAnalytics 
+            agentProperties={agentProperties} 
+            onSelectPropertyForEdit={handleStartEdit} 
+          />
+
+          <div className="space-y-6 pt-4 border-t border-slate-200">
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-bold text-blue-950">Your Active Listings</h2>
+              <span className="text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
+                {agentProperties.length} Published
+              </span>
+            </div>
+            {agentProperties.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {agentProperties.map(prop => (
                 <div key={prop.id} className="bg-white border border-slate-200 p-4 rounded-2xl flex gap-4 shadow-sm hover:shadow-md transition-shadow group">
@@ -378,6 +391,7 @@ const AgentDashboard: React.FC<AgentDashboardProps> = ({
               <p className="text-slate-400 text-sm mt-1">Start by clicking the "Create New Listing" button.</p>
             </div>
           )}
+          </div>
         </div>
       )}
     </div>
