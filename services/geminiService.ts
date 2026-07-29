@@ -1,7 +1,15 @@
 
-import { GoogleGenAI, Type } from "@google/genai";
+import { GoogleGenAI } from "@google/genai";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+let aiInstance: GoogleGenAI | null = null;
+
+function getGenAI() {
+  if (!aiInstance) {
+    const apiKey = (typeof process !== 'undefined' && process.env?.API_KEY) || (typeof process !== 'undefined' && process.env?.GEMINI_API_KEY) || '';
+    aiInstance = new GoogleGenAI({ apiKey });
+  }
+  return aiInstance;
+}
 
 export const generatePropertyDescription = async (details: {
   title: string,
@@ -22,6 +30,7 @@ export const generatePropertyDescription = async (details: {
     Make it professional, compelling, and ready for a listing website. Mention local Sierra Leonean appeal, security, and amenities where appropriate.`;
 
   try {
+    const ai = getGenAI();
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
       contents: prompt,
@@ -32,9 +41,10 @@ export const generatePropertyDescription = async (details: {
       }
     });
 
-    return response.text;
+    return response.text || "Property description generated successfully.";
   } catch (error) {
     console.error("Gemini Error:", error);
     return "Error generating description. Please write manually.";
   }
 };
+
