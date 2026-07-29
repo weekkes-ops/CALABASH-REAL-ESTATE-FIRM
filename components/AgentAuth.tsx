@@ -6,7 +6,7 @@ interface AgentAuthProps {
   onLogin: (agent: Agent) => void;
 }
 
-const AUTHORIZATION_CODE = "CALABASH-ELITE-2024";
+const AUTHORIZATION_CODE = "CALABASH-ELITE-2026-7";
 
 const AgentAuth: React.FC<AgentAuthProps> = ({ onLogin }) => {
   const [isRegistering, setIsRegistering] = useState(false);
@@ -103,7 +103,16 @@ const AgentAuth: React.FC<AgentAuthProps> = ({ onLogin }) => {
           {isRegistering && (
             <>
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Authorization Code</label>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-sm font-semibold text-slate-700">Authorization Code</label>
+                  <button
+                    type="button"
+                    onClick={() => setFormData({...formData, authCode: AUTHORIZATION_CODE})}
+                    className="text-[11px] text-yellow-600 hover:text-yellow-700 font-bold underline bg-yellow-50 px-2 py-0.5 rounded"
+                  >
+                    Use Demo Code ({AUTHORIZATION_CODE})
+                  </button>
+                </div>
                 <div className="relative">
                   <input 
                     required
@@ -115,7 +124,7 @@ const AgentAuth: React.FC<AgentAuthProps> = ({ onLogin }) => {
                   />
                   <i className="fas fa-key absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
                 </div>
-                <p className="text-[10px] text-slate-400 mt-1 italic">Provided by your agency manager.</p>
+                <p className="text-[10px] text-slate-400 mt-1 italic">Demo code: <code className="bg-slate-100 text-slate-700 px-1 py-0.5 rounded font-bold">{AUTHORIZATION_CODE}</code></p>
               </div>
               <div className="grid grid-cols-1 gap-5">
                 <div>
