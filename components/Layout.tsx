@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 
 interface LayoutProps {
@@ -7,49 +6,163 @@ interface LayoutProps {
   currentPage: string;
   agent: any | null;
   onLogout: () => void;
+  onListPropertyClick: () => void;
+  onOpenAuthForListing?: (isRegistering: boolean) => void;
 }
 
-const Logo: React.FC<{ size?: 'sm' | 'md' | 'lg' }> = ({ size = 'md' }) => {
-  const dimensions = {
+export const SystemLogo: React.FC<{ size?: 'sm' | 'md' | 'lg' | 'xl'; className?: string }> = ({ 
+  size = 'md', 
+  className = '' 
+}) => {
+  const sizeClasses = {
     sm: 'w-10 h-10',
     md: 'w-14 h-14',
-    lg: 'w-48 h-48'
+    lg: 'w-44 h-44',
+    xl: 'w-56 h-56'
   };
 
   return (
-    <div className={`${dimensions[size]} rounded-full bg-[#1e3a8a] border-[3px] border-[#eab308] flex flex-col items-center justify-center text-center p-1 relative overflow-hidden shadow-inner`}>
-      {/* Double Gold Ring Inner */}
-      <div className="absolute inset-0.5 rounded-full border border-[#eab308] opacity-50 pointer-events-none"></div>
-      
-      {/* Calabash Pot Icon (SVG) */}
+    <div className={`relative inline-flex items-center justify-center shrink-0 ${sizeClasses[size]} ${className}`}>
       <svg 
-        viewBox="0 0 100 100" 
-        className={`${size === 'lg' ? 'w-20' : 'w-6'} mb-0.5`}
-        fill="none" 
-        stroke="#eab308" 
-        strokeWidth="4"
+        viewBox="0 0 500 500" 
+        className="w-full h-full drop-shadow-md select-none"
+        xmlns="http://www.w3.org/2000/svg"
       >
-        <path d="M50 15 L50 35 M40 35 L60 35 C65 35 80 45 80 65 C80 85 65 90 50 90 C35 90 20 85 20 65 C20 45 35 35 40 35" strokeLinecap="round" />
-        <line x1="30" y1="62" x2="70" y2="62" strokeWidth="2" />
+        {/* Background Circle */}
+        <circle cx="250" cy="250" r="240" fill="#092d87" />
+        
+        {/* Outer Golden Ring */}
+        <circle cx="250" cy="250" r="222" fill="#092d87" stroke="#fbc02d" strokeWidth="12" />
+        
+        {/* Inner Golden Ring */}
+        <circle cx="250" cy="250" r="198" fill="none" stroke="#fbc02d" strokeWidth="7" />
+        
+        {/* Calabash Gourd Silhouette Outline */}
+        <g stroke="#fbc02d" strokeWidth="11" strokeLinecap="round" strokeLinejoin="round" fill="none">
+          {/* Top lip rim */}
+          <line x1="238" y1="94" x2="262" y2="94" strokeWidth="12" />
+          {/* Symmetrical calabash contour */}
+          <path d="M241 94 C241 116 244 136 240 148 C232 165 186 182 186 215 C186 248 214 258 250 258 C286 258 314 248 314 215 C314 182 268 165 260 148 C256 136 259 116 259 94" />
+          {/* Horizontal waist divider line */}
+          <line x1="192" y1="208" x2="308" y2="208" strokeWidth="10" />
+        </g>
+        
+        {/* Brand Text: CALABASH */}
+        <text 
+          x="250" 
+          y="318" 
+          textAnchor="middle" 
+          fontFamily="system-ui, -apple-system, BlinkMacSystemFont, 'Inter', 'Arial Black', sans-serif" 
+          fontWeight="900" 
+          fontSize="56" 
+          letterSpacing="2.5" 
+          fill="#fbc02d"
+        >
+          CALABASH
+        </text>
+        
+        {/* Brand Text: REAL ESTATE FIRM */}
+        <text 
+          x="250" 
+          y="354" 
+          textAnchor="middle" 
+          fontFamily="system-ui, -apple-system, BlinkMacSystemFont, 'Inter', sans-serif" 
+          fontWeight="800" 
+          fontSize="23" 
+          letterSpacing="4" 
+          fill="#fbc02d"
+        >
+          REAL ESTATE FIRM
+        </text>
       </svg>
-      
-      {/* Brand Text */}
-      <div className="flex flex-col items-center leading-none">
-        <span className={`${size === 'lg' ? 'text-2xl' : 'text-[8px]'} font-black text-[#eab308] tracking-wider`}>CALABASH</span>
-        <span className={`${size === 'lg' ? 'text-[10px]' : 'text-[4px]'} font-bold text-[#eab308] tracking-widest mt-0.5`}>REAL ESTATE FIRM</span>
-        {size === 'lg' && (
-          <div className="mt-2 flex flex-col items-center">
-             <span className="text-[7px] text-[#eab308] opacity-90 font-medium">No 11 Dillet Street</span>
-             <span className="text-[7px] text-[#eab308] opacity-90 font-medium uppercase tracking-widest">Freetown</span>
-          </div>
-        )}
-      </div>
     </div>
   );
 };
 
-const Layout: React.FC<LayoutProps> = ({ children, onNavigate, currentPage, agent, onLogout }) => {
+const Layout: React.FC<LayoutProps> = ({ 
+  children, 
+  onNavigate, 
+  currentPage, 
+  agent, 
+  onLogout,
+  onListPropertyClick,
+  onOpenAuthForListing
+}) => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+  const [isAuthPromptOpen, setIsAuthPromptOpen] = useState(false);
+
+  const handleListPropertyButtonClick = () => {
+    if (agent) {
+      onListPropertyClick();
+    } else {
+      setIsAuthPromptOpen(true);
+    }
+  };
+
+  const handleProceedToAuth = (isRegistering: boolean) => {
+    setIsAuthPromptOpen(false);
+    if (onOpenAuthForListing) {
+      onOpenAuthForListing(isRegistering);
+    } else {
+      onNavigate('agent');
+    }
+  };
+
+  const AuthRequiredModal = () => (
+    <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-blue-950/70 backdrop-blur-md animate-in fade-in duration-200">
+      <div className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl border border-blue-100 animate-in zoom-in-95 duration-200">
+        <div className="bg-gradient-to-r from-blue-900 to-blue-950 p-6 text-white text-center relative">
+          <button 
+            onClick={() => setIsAuthPromptOpen(false)}
+            className="absolute top-5 right-5 text-white/70 hover:text-white transition-colors"
+          >
+            <i className="fas fa-times text-lg"></i>
+          </button>
+          <div className="mx-auto mb-3 flex items-center justify-center">
+            <SystemLogo size="sm" />
+          </div>
+          <h3 className="text-xl font-bold">Account Required</h3>
+          <p className="text-blue-200 text-xs mt-1">To list a property on Calabash Real Estate, you must have an active account.</p>
+        </div>
+        
+        <div className="p-6 space-y-4">
+          <div className="bg-amber-50 border border-amber-200 p-4 rounded-2xl flex items-start space-x-3 text-amber-900">
+            <i className="fas fa-shield-alt text-amber-600 text-lg mt-0.5 shrink-0"></i>
+            <p className="text-xs leading-relaxed">
+              We require verified accounts to guarantee quality listings and protect buyers and tenants across Sierra Leone.
+            </p>
+          </div>
+
+          <div className="space-y-3 pt-2">
+            <button
+              onClick={() => handleProceedToAuth(true)}
+              className="w-full bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-3.5 px-4 rounded-xl shadow-lg shadow-yellow-200 transition-all flex items-center justify-center space-x-2 active:scale-98"
+            >
+              <i className="fas fa-user-plus"></i>
+              <span>Create New Account</span>
+            </button>
+
+            <button
+              onClick={() => handleProceedToAuth(false)}
+              className="w-full bg-blue-50 hover:bg-blue-100 text-blue-900 font-bold py-3 px-4 rounded-xl transition-all flex items-center justify-center space-x-2 border border-blue-200 active:scale-98"
+            >
+              <i className="fas fa-sign-in-alt"></i>
+              <span>Sign In to Existing Account</span>
+            </button>
+          </div>
+
+          <div className="text-center pt-2">
+            <button
+              onClick={() => setIsAuthPromptOpen(false)}
+              className="text-xs text-slate-400 hover:text-slate-600 font-semibold"
+            >
+              Cancel and Return
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 
   const ContactModal = () => (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-blue-950/60 backdrop-blur-sm animate-in fade-in duration-300">
@@ -62,14 +175,14 @@ const Layout: React.FC<LayoutProps> = ({ children, onNavigate, currentPage, agen
             <i className="fas fa-times text-xl"></i>
           </button>
           <div className="flex items-center space-x-4">
-            <Logo size="sm" />
+            <SystemLogo size="sm" />
             <div>
               <h2 className="text-2xl font-bold mb-0">Get in Touch</h2>
-              <p className="text-blue-100 text-xs opacity-80">Serving Freetown with integrity since 2024.</p>
+              <p className="text-yellow-400 font-medium text-xs mt-0.5">9 Bawick Street Freetown, Sierra Leone</p>
             </div>
           </div>
         </div>
-        <form className="p-8 space-y-4" onSubmit={(e) => { e.preventDefault(); setIsContactModalOpen(false); alert('Thank you! Your inquiry has been sent to our Freetown office.'); }}>
+        <form className="p-8 space-y-4" onSubmit={(e) => { e.preventDefault(); setIsContactModalOpen(false); alert('Thank you! Your inquiry has been sent to our Freetown office at 9 Bawick Street Freetown, Sierra Leone.'); }}>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Full Name</label>
@@ -84,8 +197,9 @@ const Layout: React.FC<LayoutProps> = ({ children, onNavigate, currentPage, agen
             <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Subject</label>
             <select className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-yellow-500 outline-none transition-all text-sm bg-white">
               <option>Property Inquiry</option>
+              <option>List a Property</option>
               <option>Investment Advice</option>
-              <option>Sell My Property</option>
+              <option>Sell or Rent Property</option>
               <option>Other</option>
             </select>
           </div>
@@ -104,75 +218,100 @@ const Layout: React.FC<LayoutProps> = ({ children, onNavigate, currentPage, agen
   return (
     <div className="min-h-screen flex flex-col">
       {isContactModalOpen && <ContactModal />}
-      <nav className="bg-white border-b border-slate-200 sticky top-0 z-50">
+      {isAuthPromptOpen && <AuthRequiredModal />}
+
+      <nav className="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-20 items-center">
+            {/* Logo */}
             <div 
               className="flex items-center cursor-pointer group" 
               onClick={() => onNavigate('home')}
             >
-              <Logo size="md" />
+              <SystemLogo size="md" />
               <div className="ml-3 flex flex-col">
-                <span className="text-xl font-black tracking-tight text-[#1e3a8a] leading-none group-hover:text-yellow-600 transition-colors">CALABASH</span>
-                <span className="text-[10px] font-bold text-[#eab308] tracking-widest leading-none mt-1">REAL ESTATE FIRM</span>
+                <span className="text-xl font-black tracking-tight text-[#092d87] leading-none group-hover:text-yellow-600 transition-colors">CALABASH</span>
+                <span className="text-[10px] font-bold text-yellow-600 tracking-widest leading-none mt-1">REAL ESTATE FIRM</span>
               </div>
             </div>
 
-            <div className="hidden md:flex space-x-6">
+            {/* Navigation Links */}
+            <div className="hidden lg:flex space-x-6 items-center">
               <button 
                 onClick={() => onNavigate('home')}
-                className={`text-sm font-bold transition-colors ${currentPage === 'home' ? 'text-yellow-600' : 'text-slate-500 hover:text-blue-900'}`}
+                className={`text-sm font-bold transition-colors ${currentPage === 'home' ? 'text-yellow-600' : 'text-slate-600 hover:text-blue-900'}`}
               >
                 Home
               </button>
               <button 
                 onClick={() => onNavigate('listings')}
-                className={`text-sm font-bold transition-colors ${currentPage === 'listings' ? 'text-yellow-600' : 'text-slate-500 hover:text-blue-900'}`}
+                className={`text-sm font-bold transition-colors ${currentPage === 'listings' ? 'text-yellow-600' : 'text-slate-600 hover:text-blue-900'}`}
               >
                 Properties
               </button>
               <button 
                 onClick={() => onNavigate('favorites')}
-                className={`text-sm font-bold transition-colors ${currentPage === 'favorites' ? 'text-yellow-600' : 'text-slate-500 hover:text-blue-900'}`}
+                className={`text-sm font-bold transition-colors ${currentPage === 'favorites' ? 'text-yellow-600' : 'text-slate-600 hover:text-blue-900'}`}
               >
                 Favorites
               </button>
               <button 
                 onClick={() => onNavigate('about')}
-                className={`text-sm font-bold transition-colors ${currentPage === 'about' ? 'text-yellow-600' : 'text-slate-500 hover:text-blue-900'}`}
+                className={`text-sm font-bold transition-colors ${currentPage === 'about' ? 'text-yellow-600' : 'text-slate-600 hover:text-blue-900'}`}
               >
                 About Us
               </button>
               <button 
                 onClick={() => onNavigate('blog')}
-                className={`text-sm font-bold transition-colors ${currentPage === 'blog' ? 'text-yellow-600' : 'text-slate-500 hover:text-blue-900'}`}
+                className={`text-sm font-bold transition-colors ${currentPage === 'blog' ? 'text-yellow-600' : 'text-slate-600 hover:text-blue-900'}`}
               >
                 Blog
               </button>
               <button 
                 onClick={() => setIsContactModalOpen(true)}
-                className="text-sm font-bold text-slate-500 hover:text-blue-900 transition-colors"
+                className="text-sm font-bold text-slate-600 hover:text-blue-900 transition-colors"
               >
                 Contact
               </button>
             </div>
 
-            <div className="flex items-center space-x-4">
+            {/* Action Buttons: List a Property + Account/Login */}
+            <div className="flex items-center space-x-3">
+              {/* List a Property Button */}
+              <button
+                onClick={handleListPropertyButtonClick}
+                className="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2.5 rounded-full text-xs md:text-sm font-bold transition-all shadow-md shadow-yellow-900/10 active:scale-95 flex items-center space-x-2"
+                title="List your property on Calabash Real Estate"
+              >
+                <i className="fas fa-plus-circle text-yellow-200"></i>
+                <span>List a Property</span>
+              </button>
+
               {agent ? (
-                <div className="flex items-center space-x-4">
-                  <div className="flex flex-col items-end">
+                <div className="flex items-center space-x-3 border-l border-slate-200 pl-3">
+                  <div className="hidden sm:flex flex-col items-end">
                     <span className="text-xs font-semibold text-blue-950">{agent.name}</span>
-                    <span className="text-[10px] text-yellow-600 bg-yellow-50 px-1.5 rounded-full border border-yellow-100 font-bold uppercase tracking-tighter">Authorized Agent</span>
+                    {agent.isAdmin ? (
+                      <span className="text-[9px] text-blue-950 bg-yellow-400 px-2 py-0.5 rounded-full font-black uppercase tracking-wider shadow-xs">
+                        System Admin
+                      </span>
+                    ) : (
+                      <span className="text-[9px] text-yellow-700 bg-yellow-50 px-1.5 py-0.5 rounded-full border border-yellow-200 font-bold uppercase tracking-tight">
+                        {agent.agency || 'Active Member'}
+                      </span>
+                    )}
                   </div>
                   <button 
                     onClick={() => onNavigate('agent')}
-                    className="p-2 bg-blue-50 rounded-full hover:bg-blue-100 transition-colors"
+                    className="p-2 bg-blue-50 text-blue-900 rounded-full hover:bg-blue-100 transition-colors"
+                    title={agent.isAdmin ? 'System Management' : 'My Dashboard'}
                   >
-                    <i className="fas fa-user-tie text-blue-800"></i>
+                    <i className={`fas ${agent.isAdmin ? 'fa-user-shield text-yellow-700' : 'fa-user-circle'} text-lg`}></i>
                   </button>
                   <button 
                     onClick={onLogout}
-                    className="text-sm text-slate-500 hover:text-red-600 transition-colors"
+                    className="text-xs text-slate-500 hover:text-red-600 transition-colors font-medium"
+                    title="Sign Out"
                   >
                     Logout
                   </button>
@@ -180,32 +319,49 @@ const Layout: React.FC<LayoutProps> = ({ children, onNavigate, currentPage, agen
               ) : (
                 <button 
                   onClick={() => onNavigate('agent')}
-                  className="bg-blue-900 text-yellow-500 px-5 py-2.5 rounded-full text-sm font-bold hover:bg-blue-950 transition-all shadow-sm active:scale-95 border border-blue-800"
+                  className="bg-blue-900 text-yellow-400 px-4 py-2.5 rounded-full text-xs md:text-sm font-bold hover:bg-blue-950 transition-all shadow-sm active:scale-95 border border-blue-800 flex items-center space-x-1.5"
                 >
-                  Agent Portal
+                  <i className="fas fa-user-tie"></i>
+                  <span>Account</span>
                 </button>
               )}
             </div>
           </div>
         </div>
       </nav>
+
       <main className="flex-grow">
         {children}
       </main>
+
       <footer className="bg-blue-950 text-blue-200/60 py-16 mt-20 border-t border-blue-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center">
-          <div className="mb-8 transform hover:scale-105 transition-transform cursor-pointer" onClick={() => onNavigate('home')}>
-            <Logo size="lg" />
+          <div 
+            className="mb-8 transform hover:scale-105 transition-transform cursor-pointer" 
+            onClick={() => onNavigate('home')}
+            title="Calabash Real Estate Firm"
+          >
+            <SystemLogo size="lg" />
           </div>
           
           <h2 className="text-white font-black text-2xl tracking-widest mb-2 uppercase">Calabash Real Estate Firm</h2>
-          <p className="text-yellow-500 font-bold text-sm tracking-widest mb-6">No 11 Dillet Street, Freetown</p>
+          <p className="text-yellow-500 font-bold text-base tracking-widest mb-6">9 Bawick Street Freetown, Sierra Leone</p>
           
-          <p className="max-w-md mx-auto mb-10 text-sm leading-relaxed text-blue-100/70 italic">
+          <p className="max-w-md mx-auto mb-8 text-sm leading-relaxed text-blue-100/70 italic">
             Building Value. Creating Communities. Securing Futures. A trusted real estate firm committed to delivering reliable property solutions with integrity, professionalism, and excellence in Sierra Leone.
           </p>
 
-          <div className="flex justify-center space-x-12 mb-10 text-xs font-black uppercase tracking-widest">
+          <div className="mb-8">
+            <button
+              onClick={handleListPropertyButtonClick}
+              className="bg-yellow-600 hover:bg-yellow-700 text-white px-8 py-3 rounded-full text-sm font-bold shadow-lg shadow-yellow-900/30 transition-all inline-flex items-center space-x-2 active:scale-95"
+            >
+              <i className="fas fa-home"></i>
+              <span>List Your Property with Us</span>
+            </button>
+          </div>
+
+          <div className="flex flex-wrap justify-center gap-6 sm:space-x-12 mb-10 text-xs font-black uppercase tracking-widest">
              <button onClick={() => onNavigate('about')} className="hover:text-yellow-500 transition-colors">About Us</button>
              <button onClick={() => onNavigate('blog')} className="hover:text-yellow-500 transition-colors">Blog</button>
              <button onClick={() => onNavigate('listings')} className="hover:text-yellow-500 transition-colors">Listings</button>
@@ -221,11 +377,11 @@ const Layout: React.FC<LayoutProps> = ({ children, onNavigate, currentPage, agen
           </div>
 
           <div className="border-t border-blue-900/50 pt-10 w-full">
-            <div className="text-[9px] uppercase tracking-[0.4em] font-bold text-blue-300 opacity-50">
-              Professionalism • Transparency • Integrity
+            <div className="text-[10px] uppercase tracking-[0.3em] font-bold text-blue-300 opacity-60">
+              9 Bawick Street Freetown, Sierra Leone
             </div>
-            <div className="mt-4 text-[10px] uppercase font-bold text-blue-400">
-              &copy; 2024 Calabash Real Estate Firm. All rights reserved.
+            <div className="mt-3 text-[10px] uppercase font-bold text-blue-400">
+              &copy; 2026 Calabash Real Estate Firm. All rights reserved.
             </div>
           </div>
         </div>

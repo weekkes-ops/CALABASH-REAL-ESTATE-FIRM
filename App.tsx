@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Layout from './components/Layout';
 import PropertyCard from './components/PropertyCard';
@@ -30,7 +29,12 @@ const HERO_IMAGES = [
   }
 ];
 
-const HeroSlideshow: React.FC<{ onExplore: () => void; onAgentPortal: () => void }> = ({ onExplore, onAgentPortal }) => {
+const HeroSlideshow: React.FC<{ 
+  onExplore: () => void; 
+  onAgentPortal: () => void;
+  onListProperty: () => void;
+  agent: Agent | null;
+}> = ({ onExplore, onAgentPortal, onListProperty, agent }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
@@ -64,7 +68,7 @@ const HeroSlideshow: React.FC<{ onExplore: () => void; onAgentPortal: () => void
       {/* Content */}
       <div className="relative z-10 text-center text-white px-4 max-w-5xl animate-in fade-in zoom-in-95 duration-700">
         <span className="inline-block px-4 py-2 bg-yellow-600/20 backdrop-blur-md rounded-full text-xs font-bold tracking-widest uppercase mb-6 border border-yellow-500/30">
-          Trusted Expertise in Sierra Leone
+          Trusted Expertise in Sierra Leone • 9 Bawick Street Freetown
         </span>
         <h1 className="text-5xl md:text-8xl font-extrabold tracking-tight mb-8 leading-tight">
           {HERO_IMAGES[currentIndex].title} <span className="text-yellow-500 italic block md:inline">{HERO_IMAGES[currentIndex].subtitle}</span>
@@ -73,18 +77,27 @@ const HeroSlideshow: React.FC<{ onExplore: () => void; onAgentPortal: () => void
           A trusted real estate firm committed to delivering reliable property solutions with integrity, professionalism, and excellence.
         </p>
         
-        <div className="flex flex-col md:flex-row items-center justify-center gap-4">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <button 
             onClick={onExplore}
-            className="px-10 py-4 bg-yellow-600 hover:bg-yellow-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-yellow-900/20 active:scale-95 text-lg w-full md:w-auto"
+            className="px-8 py-4 bg-yellow-600 hover:bg-yellow-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-yellow-900/20 active:scale-95 text-base md:text-lg w-full sm:w-auto"
           >
             Discover Properties
           </button>
+          
+          <button 
+            onClick={onListProperty}
+            className="px-8 py-4 bg-amber-500 hover:bg-amber-600 text-blue-950 font-extrabold rounded-xl transition-all shadow-lg shadow-amber-900/20 active:scale-95 text-base md:text-lg w-full sm:w-auto flex items-center justify-center space-x-2 border border-amber-300"
+          >
+            <i className="fas fa-plus-circle"></i>
+            <span>List a Property</span>
+          </button>
+
           <button 
             onClick={onAgentPortal}
-            className="px-10 py-4 bg-white/10 backdrop-blur-md hover:bg-white/20 text-white border border-white/30 font-bold rounded-xl transition-all active:scale-95 text-lg w-full md:w-auto"
+            className="px-8 py-4 bg-white/10 backdrop-blur-md hover:bg-white/20 text-white border border-white/30 font-bold rounded-xl transition-all active:scale-95 text-base md:text-lg w-full sm:w-auto"
           >
-            Agent Portal
+            {agent?.isAdmin ? 'System Admin' : (agent ? 'My Dashboard' : 'Account Portal')}
           </button>
         </div>
       </div>
@@ -127,6 +140,21 @@ const App: React.FC = () => {
   const [properties, setProperties] = useState<Property[]>(initialProperties);
   const [favorites, setFavorites] = useState<string[]>([]);
   const [selectedBlogPost, setSelectedBlogPost] = useState<BlogPost | null>(null);
+  const [blogPosts, setBlogPosts] = useState<BlogPost[]>(() => {
+    const saved = localStorage.getItem('calabash_blog_posts');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch {
+        return initialBlogPosts;
+      }
+    }
+    return initialBlogPosts;
+  });
+
+  const [dashboardMode, setDashboardMode] = useState<'list' | 'form'>('list');
+  const [authIsRegistering, setAuthIsRegistering] = useState<boolean>(false);
+  const [authNotice, setAuthNotice] = useState<string | null>(null);
   
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<'All' | 'Sale' | 'Rent'>('All');
@@ -138,20 +166,35 @@ const App: React.FC = () => {
 
   useEffect(() => {
     const savedAgent = localStorage.getItem('estate_agent');
-    if (savedAgent) setAgent(JSON.parse(savedAgent));
+    if (savedAgent) {
+      try {
+        setAgent(JSON.parse(savedAgent));
+      } catch {
+        // ignore
+      }
+    }
     
     const savedFavorites = localStorage.getItem('estate_favorites');
-    if (savedFavorites) setFavorites(JSON.parse(savedFavorites));
+    if (savedFavorites) {
+      try {
+        setFavorites(JSON.parse(savedFavorites));
+      } catch {
+        // ignore
+      }
+    }
 
     const savedProps = localStorage.getItem('estate_properties');
     if (savedProps) {
-        // Merge saved props with initial ones to ensure consistency, filtering out duplicates by ID
+      try {
         const saved = JSON.parse(savedProps) as Property[];
         const merged = [...saved];
         initialProperties.forEach(p => {
-            if (!merged.find(m => m.id === p.id)) merged.push(p);
+          if (!merged.find(m => m.id === p.id)) merged.push(p);
         });
         setProperties(merged);
+      } catch {
+        // ignore
+      }
     }
   }, []);
 
@@ -168,12 +211,15 @@ const App: React.FC = () => {
   const handleLogin = (newAgent: Agent) => {
     setAgent(newAgent);
     localStorage.setItem('estate_agent', JSON.stringify(newAgent));
+    setAuthNotice(null);
     setCurrentPage('agent');
   };
 
   const handleLogout = () => {
     setAgent(null);
     localStorage.removeItem('estate_agent');
+    setDashboardMode('list');
+    setAuthNotice(null);
     setCurrentPage('home');
   };
 
@@ -194,6 +240,36 @@ const App: React.FC = () => {
     const updated = properties.filter(p => p.id !== id);
     setProperties(updated);
     localStorage.setItem('estate_properties', JSON.stringify(updated));
+  };
+
+  const handleAddBlogPost = (post: BlogPost) => {
+    const updated = [post, ...blogPosts];
+    setBlogPosts(updated);
+    localStorage.setItem('calabash_blog_posts', JSON.stringify(updated));
+  };
+
+  const handleDeleteBlogPost = (id: string) => {
+    const updated = blogPosts.filter(p => p.id !== id);
+    setBlogPosts(updated);
+    localStorage.setItem('calabash_blog_posts', JSON.stringify(updated));
+  };
+
+  const handleListPropertyClick = () => {
+    if (agent) {
+      setDashboardMode('form');
+      setCurrentPage('agent');
+    } else {
+      setAuthNotice('You must have an account on Calabash Real Estate to list a property. Please create an account or sign in below.');
+      setAuthIsRegistering(true);
+      setCurrentPage('agent');
+    }
+  };
+
+  const handleOpenAuthForListing = (isRegistering: boolean) => {
+    setAuthNotice('You must have an account on Calabash Real Estate to list a property. Please complete the form below to proceed.');
+    setAuthIsRegistering(isRegistering);
+    setDashboardMode('form');
+    setCurrentPage('agent');
   };
 
   const filteredProperties = properties.filter(p => {
@@ -227,6 +303,9 @@ const App: React.FC = () => {
 
   const handlePageChange = (page: 'home' | 'agent' | 'listings' | 'about' | 'blog' | 'favorites') => {
     setSelectedBlogPost(null);
+    if (page === 'agent' && !authNotice) {
+      setDashboardMode('list');
+    }
     setCurrentPage(page);
   };
 
@@ -238,16 +317,21 @@ const App: React.FC = () => {
       currentPage={currentPage} 
       agent={agent} 
       onLogout={handleLogout}
+      onListPropertyClick={handleListPropertyClick}
+      onOpenAuthForListing={handleOpenAuthForListing}
     >
       {currentPage === 'home' && (
         <div className="animate-in fade-in duration-700">
           <HeroSlideshow 
             onExplore={() => setCurrentPage('listings')} 
             onAgentPortal={() => setCurrentPage('agent')} 
+            onListProperty={handleListPropertyClick}
+            agent={agent}
           />
           <section className="py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
               <div className="space-y-6">
+                <span className="text-yellow-600 font-bold uppercase tracking-widest text-xs">9 Bawick Street Freetown, Sierra Leone</span>
                 <h2 className="text-4xl font-extrabold text-blue-950">Who We Are</h2>
                 <div className="w-20 h-1 bg-yellow-600"></div>
                 <p className="text-slate-600 text-lg leading-relaxed">
@@ -256,12 +340,20 @@ const App: React.FC = () => {
                 <p className="text-slate-600 text-lg leading-relaxed">
                   Our team combines industry insight with personalized service to ensure every transaction is transparent, efficient, and rewarding.
                 </p>
-                <button 
-                  onClick={() => setCurrentPage('about')}
-                  className="mt-4 text-blue-900 font-bold hover:text-yellow-600 flex items-center transition-colors"
-                >
-                  Learn more about our history <i className="fas fa-arrow-right ml-2"></i>
-                </button>
+                <div className="pt-2 flex flex-wrap gap-4">
+                  <button 
+                    onClick={() => setCurrentPage('about')}
+                    className="text-blue-900 font-bold hover:text-yellow-600 flex items-center transition-colors"
+                  >
+                    Learn more about our history <i className="fas fa-arrow-right ml-2"></i>
+                  </button>
+                  <button 
+                    onClick={handleListPropertyClick}
+                    className="text-yellow-700 font-bold hover:text-yellow-800 flex items-center transition-colors"
+                  >
+                    List your property <i className="fas fa-plus-circle ml-2"></i>
+                  </button>
+                </div>
               </div>
               <div className="relative">
                 <img src="https://images.unsplash.com/photo-1577412647305-991150c7d163?auto=format&fit=crop&w=800&q=80" className="rounded-3xl shadow-2xl border border-blue-50" alt="Modern Architecture" />
@@ -275,6 +367,7 @@ const App: React.FC = () => {
         <div className="animate-in fade-in duration-700 pb-20">
           <section className="bg-blue-900 py-24 text-white">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+              <span className="text-yellow-400 font-bold text-xs uppercase tracking-widest mb-2 block">Headquarters: 9 Bawick Street Freetown, Sierra Leone</span>
               <h1 className="text-5xl font-extrabold mb-6">About <span className="text-yellow-500">Calabash</span></h1>
               <p className="text-xl text-blue-100 max-w-2xl mx-auto opacity-80">Sierra Leone's leading firm for Building Value and Securing Futures.</p>
             </div>
@@ -282,8 +375,17 @@ const App: React.FC = () => {
           <section className="py-24 max-w-6xl mx-auto px-4">
              <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
                <div className="text-slate-600 leading-relaxed space-y-4">
-                 <p>Calabash Real Estate Company was founded on the principles of integrity and professional excellence. We recognized a need for a modern, transparent real estate firm in Sierra Leone.</p>
+                 <p>Calabash Real Estate Company was founded on the principles of integrity and professional excellence. Located at <strong>9 Bawick Street Freetown, Sierra Leone</strong>, we recognized a need for a modern, transparent real estate firm in Sierra Leone.</p>
                  <p>We bridge the gap between local opportunity and ownership, ensuring every client makes a confident, informed decision.</p>
+                 <div className="pt-4">
+                   <button 
+                     onClick={handleListPropertyClick}
+                     className="px-6 py-3 bg-yellow-600 hover:bg-yellow-700 text-white font-bold rounded-xl transition-all shadow-md active:scale-95 text-sm inline-flex items-center space-x-2"
+                   >
+                     <i className="fas fa-plus-circle"></i>
+                     <span>List a Property on Calabash</span>
+                   </button>
+                 </div>
                </div>
                <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80" className="rounded-3xl shadow-xl" alt="Office space" />
              </div>
@@ -321,8 +423,7 @@ const App: React.FC = () => {
                     <i className="fas fa-calendar-alt mr-2 text-yellow-600"></i> {selectedBlogPost.date}
                   </div>
                 </div>
-                <div className="prose prose-lg prose-blue-950 max-w-none text-slate-700 leading-relaxed italic">
-                  {/* Since content is simple text in mock data, we just render it. In real app, could be markdown or rich text */}
+                <div className="prose prose-lg prose-blue-950 max-w-none text-slate-700 leading-relaxed italic whitespace-pre-line">
                   {selectedBlogPost.content}
                 </div>
                 <div className="mt-16 p-10 bg-blue-950 rounded-[3rem] text-white">
@@ -340,12 +441,12 @@ const App: React.FC = () => {
               <section className="bg-blue-50/50 py-24 border-b border-blue-100">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
                   <h1 className="text-5xl font-extrabold text-blue-950 mb-6">Calabash <span className="text-yellow-600">Blog</span></h1>
-                  <p className="text-xl text-slate-500 max-w-2xl mx-auto">Insights, trends, and expert advice for the Sierra Leonean real estate market.</p>
+                  <p className="text-xl text-slate-500 max-w-2xl mx-auto">Insights, trends, and expert property spotlights for the Sierra Leonean market.</p>
                 </div>
               </section>
               <section className="max-w-7xl mx-auto px-4 py-16">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-                  {initialBlogPosts.map(post => (
+                  {blogPosts.map(post => (
                     <div key={post.id} className="group bg-white rounded-3xl border border-blue-50 overflow-hidden shadow-sm hover:shadow-xl transition-all flex flex-col">
                       <div className="h-56 overflow-hidden relative shrink-0">
                         <img src={post.image} alt={post.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
@@ -379,10 +480,28 @@ const App: React.FC = () => {
 
       {currentPage === 'listings' && (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 animate-in fade-in slide-in-from-top-4 duration-500">
-          <div className="text-center mb-16">
-            <h1 className="text-5xl font-extrabold text-blue-950 tracking-tight">Browse <span className="text-yellow-600">Listings</span></h1>
-            <p className="text-slate-500 mt-4 text-xl">Find your next chapter in Sierra Leone among our curated properties.</p>
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+            <div>
+              <span className="text-yellow-600 font-bold uppercase tracking-widest text-xs">Sierra Leone Properties</span>
+              <h1 className="text-4xl md:text-5xl font-extrabold text-blue-950 tracking-tight mt-1">Browse <span className="text-yellow-600">Listings</span></h1>
+              <p className="text-slate-500 mt-2 text-lg">Find your next chapter in Sierra Leone among our curated properties.</p>
+            </div>
+            {/* List Property Prompt in Listings */}
+            <div className="bg-blue-50 border border-blue-100 p-5 rounded-2xl flex items-center justify-between gap-4">
+              <div>
+                <p className="text-xs font-bold text-blue-950 uppercase tracking-wide">Have a property to sell or rent?</p>
+                <p className="text-xs text-slate-500">List with Calabash to connect with vetted buyers.</p>
+              </div>
+              <button
+                onClick={handleListPropertyClick}
+                className="bg-yellow-600 hover:bg-yellow-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition-all shadow shrink-0 active:scale-95 flex items-center space-x-1.5"
+              >
+                <i className="fas fa-plus"></i>
+                <span>List a Property</span>
+              </button>
+            </div>
           </div>
+
           <div className="bg-white p-6 rounded-3xl border border-blue-50 shadow-sm flex flex-col gap-6 mb-12">
             <div className="flex flex-col md:flex-row gap-6 items-center w-full">
               <div className="relative flex-1 w-full">
@@ -448,6 +567,7 @@ const App: React.FC = () => {
               </div>
             )}
           </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
             {filteredProperties.length > 0 ? (
               filteredProperties.map(prop => (
@@ -511,14 +631,23 @@ const App: React.FC = () => {
       {currentPage === 'agent' && (
         <div className="animate-in fade-in slide-in-from-right-4 duration-500">
           {!agent ? (
-            <AgentAuth onLogin={handleLogin} />
+            <AgentAuth 
+              onLogin={handleLogin} 
+              initialIsRegistering={authIsRegistering}
+              authNotice={authNotice}
+            />
           ) : (
             <AgentDashboard 
               agent={agent} 
               onAddProperty={handleAddProperty} 
-              onUpdateProperty={handleUpdateProperty}
-              onArchiveProperty={handleArchiveProperty}
+              onUpdateProperty={handleUpdateProperty} 
+              onArchiveProperty={handleArchiveProperty} 
               agentProperties={properties.filter(p => p.agentId === agent.id)}
+              allProperties={properties}
+              blogPosts={blogPosts}
+              onAddBlogPost={handleAddBlogPost}
+              onDeleteBlogPost={handleDeleteBlogPost}
+              initialViewMode={dashboardMode}
             />
           )}
         </div>

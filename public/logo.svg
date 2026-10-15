@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="100%" height="100%">
+  <!-- Deep Blue Background -->
+  <rect width="500" height="500" fill="#092d87" rx="30"/>
+  
+  <!-- Outer Ring -->
+  <circle cx="250" cy="250" r="218" fill="#092d87" stroke="#fbc02d" stroke-width="12"/>
+  
+  <!-- Inner Ring -->
+  <circle cx="250" cy="250" r="194" fill="none" stroke="#fbc02d" stroke-width="7"/>
+  
+  <!-- Calabash Gourd Icon -->
+  <g stroke="#fbc02d" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <!-- Gourd contour: rim, neck, curving shoulders, bulbous belly, rounded bottom -->
+    <path d="M239 96 L261 96 M240 96 C240 120 244 140 240 148 C232 165 186 182 186 215 C186 248 214 258 250 258 C286 258 314 248 314 215 C314 182 268 165 260 148 C256 140 260 120 260 96" />
+    <!-- Horizontal divider band across belly -->
+    <line x1="192" y1="208" x2="308" y2="208" stroke-width="10" />
+  </g>
+  
+  <!-- Brand Typography -->
+  <text x="250" y="318" text-anchor="middle" font-family="'Inter', -apple-system, BlinkMacSystemFont, 'Arial Black', sans-serif" font-weight="900" font-size="56" letter-spacing="2.5" fill="#fbc02d">
+    CALABASH
+  </text>
+  
+  <text x="250" y="354" text-anchor="middle" font-family="'Inter', -apple-system, BlinkMacSystemFont, sans-serif" font-weight="800" font-size="24" letter-spacing="4" fill="#fbc02d">
+    REAL ESTATE FIRM
+  </text>
+</svg>

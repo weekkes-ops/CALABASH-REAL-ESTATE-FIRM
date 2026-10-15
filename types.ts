@@ -23,6 +23,8 @@ export interface Agent {
   email: string;
   agency: string;
   authorized: boolean;
+  isAdmin?: boolean;
+  role?: 'admin' | 'agent' | 'user';
 }
 
 export interface BlogPost {
