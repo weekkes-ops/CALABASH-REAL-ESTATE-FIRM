@@ -377,7 +377,7 @@ const App: React.FC = () => {
                <div className="text-slate-600 leading-relaxed space-y-4">
                  <p>Calabash Real Estate Company was founded on the principles of integrity and professional excellence. Located at <strong>9 Bawick Street Freetown, Sierra Leone</strong>, we recognized a need for a modern, transparent real estate firm in Sierra Leone.</p>
                  <p>We bridge the gap between local opportunity and ownership, ensuring every client makes a confident, informed decision.</p>
-                 <div className="pt-4">
+                 <div className="pt-4 flex flex-wrap gap-4">
                    <button 
                      onClick={handleListPropertyClick}
                      className="px-6 py-3 bg-yellow-600 hover:bg-yellow-700 text-white font-bold rounded-xl transition-all shadow-md active:scale-95 text-sm inline-flex items-center space-x-2"
@@ -385,6 +385,15 @@ const App: React.FC = () => {
                      <i className="fas fa-plus-circle"></i>
                      <span>List a Property on Calabash</span>
                    </button>
+                   <a 
+                     href="https://www.facebook.com/people/Calabash-REAL-Estate-FIRM/61582511864635/"
+                     target="_blank"
+                     rel="noopener noreferrer"
+                     className="px-6 py-3 bg-[#1877F2] hover:bg-blue-700 text-white font-bold rounded-xl transition-all shadow-md active:scale-95 text-sm inline-flex items-center space-x-2"
+                   >
+                     <i className="fab fa-facebook-f"></i>
+                     <span>Follow on Facebook</span>
+                   </a>
                  </div>
                </div>
                <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80" className="rounded-3xl shadow-xl" alt="Office space" />

@@ -210,6 +210,17 @@ const Layout: React.FC<LayoutProps> = ({
           <button type="submit" className="w-full bg-yellow-600 text-white py-4 rounded-xl font-bold hover:bg-yellow-700 transition-all shadow-lg shadow-yellow-200">
             Send Message
           </button>
+          <div className="pt-2 text-center">
+            <a 
+              href="https://www.facebook.com/people/Calabash-REAL-Estate-FIRM/61582511864635/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center space-x-2 text-xs font-bold text-blue-700 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 px-4 py-2 rounded-xl transition-all border border-blue-200"
+            >
+              <i className="fab fa-facebook text-base text-[#1877F2]"></i>
+              <span>Visit our official Facebook Page</span>
+            </a>
+          </div>
         </form>
       </div>
     </div>
@@ -371,7 +382,16 @@ const Layout: React.FC<LayoutProps> = ({
 
           <div className="flex justify-center space-x-6 mb-12">
             <a href="#" className="w-10 h-10 rounded-full bg-blue-900 flex items-center justify-center hover:bg-yellow-600 hover:text-white transition-all text-white"><i className="fab fa-twitter"></i></a>
-            <a href="#" className="w-10 h-10 rounded-full bg-blue-900 flex items-center justify-center hover:bg-yellow-600 hover:text-white transition-all text-white"><i className="fab fa-facebook"></i></a>
+            <a 
+              href="https://www.facebook.com/people/Calabash-REAL-Estate-FIRM/61582511864635/" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="w-10 h-10 rounded-full bg-[#1877F2] hover:bg-blue-700 flex items-center justify-center hover:text-white transition-all text-white shadow-md"
+              title="Calabash REAL Estate FIRM on Facebook"
+              aria-label="Calabash Real Estate Firm on Facebook"
+            >
+              <i className="fab fa-facebook-f text-lg"></i>
+            </a>
             <a href="#" className="w-10 h-10 rounded-full bg-blue-900 flex items-center justify-center hover:bg-yellow-600 hover:text-white transition-all text-white"><i className="fab fa-instagram"></i></a>
             <a href="#" className="w-10 h-10 rounded-full bg-blue-900 flex items-center justify-center hover:bg-yellow-600 hover:text-white transition-all text-white"><i className="fab fa-linkedin"></i></a>
           </div>
